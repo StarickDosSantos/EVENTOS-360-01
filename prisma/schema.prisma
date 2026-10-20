@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductCategory {
+  PRODUCAO
+  ALUGUER
+  PACOTE
+}
+
+enum ProductModality {
+  VENDA
+  ALUGUER
+  AMBAS
+}
+
+enum ProductStatus {
+  PUBLISHED
+  HIDDEN
+  UNAVAILABLE
+}
+
+enum PriceUnit {
+  UNIDADE
+  DIA
+  EVENTO
+  MONTAGEM
+}
+
+enum OrderStatus {
+  PENDENTE
+  EM_ANALISE
+  AGUARDANDO_RESPOSTA
+  APROVADO
+  REJEITADO
+  CONCLUIDO
+  RESERVADO
+  ENTREGUE
+  DEVOLVIDO
+}
+
+enum OrderType {
+  COMPRA
+  ALUGUER
+  PRODUCAO
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  role         String   @default("ADMIN")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Product {
+  id            String           @id @default(cuid())
+  name          String
+  slug          String           @unique
+  description   String
+  shortDesc     String?
+  category      ProductCategory
+  modality      ProductModality
+  status        ProductStatus    @default(PUBLISHED)
+  price         Float
+  priceSale     Float?           // preço de compra quando modality = AMBAS
+  priceUnit     PriceUnit        @default(UNIDADE)
+  minDays       Int?             // mínimo de dias para aluguer
+  stock         Int              @default(1)
+  image         String?
+  gallery       String           @default("[]") // JSON array of urls
+  specs         String?          // JSON or markdown
+  featured      Boolean          @default(false)
+  sortOrder     Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  orderItems    OrderItem[]
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  code            String      @unique
+  status          OrderStatus @default(PENDENTE)
+  type            OrderType
+  customerName    String
+  customerPhone   String
+  customerEmail   String
+  eventDate       DateTime?
+  location        String?
+  notes           String?
+  totalEstimated  Float
+  adminNotes      String?
+  contactLog      String      @default("[]") // JSON log of contacts
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id              String  @id @default(cuid())
+  orderId         String
+  order           Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId       String?
+  product         Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  // Snapshot at order time
+  productName     String
+  productSlug     String?
+  quantity        Int
+  days            Int?    // for rental
+  unitPrice       Float
+  lineTotal       Float
+  modality        String  // VENDA | ALUGUER
+  priceUnit       String
+}
+
+/// Projecto de galeria (ex: FILDA 2026) com várias fotos
+model GalleryProject {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?
+  category    String   // Feiras, Corporativo, Festas, etc.
+  coverImage  String
+  images      String   @default("[]") // JSON array of image URLs
+  published   Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  eventDate   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
