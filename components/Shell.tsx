@@ -31,7 +31,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const totalItems = useCartStore((s) => s.totalItems());
+  const items = useCartStore((s) => s.items);
+  const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
   const isAdmin = session?.user?.role === "ADMIN";
   const isAdminRoute = pathname?.startsWith("/admin");
 

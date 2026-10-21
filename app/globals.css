@@ -108,3 +108,16 @@
   background-size: 200% 100%;
   animation: heroShimmer 8s linear infinite;
 }
+
+.hero-outline-text {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(80, 60, 120, 0.2);
+  font-size: clamp(4.5rem, 18vw, 11rem);
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+  user-select: none;
+}
+.dark .hero-outline-text {
+  -webkit-text-stroke: 1.5px rgba(200, 180, 255, 0.14);
+}

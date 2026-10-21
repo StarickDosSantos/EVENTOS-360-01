@@ -1,215 +1,194 @@
+
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Sparkles, Play } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  ArrowDownRight,
+  ArrowRight,
+  MessageCircle,
+  Sparkles,
+  Box,
+  Layers3,
+  CalendarCheck,
+} from "lucide-react";
+import { Manrope } from "next/font/google";
 
-const FLOATING = [
-  {
-    src: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80",
-    className: "left-[8%] top-[18%] h-28 w-40 sm:h-36 sm:w-52",
-    delay: "0s",
-    depth: 0.15,
-  },
-  {
-    src: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&q=80",
-    className: "right-[6%] top-[22%] h-24 w-36 sm:h-32 sm:w-48",
-    delay: "0.4s",
-    depth: 0.25,
-  },
-  {
-    src: "https://images.unsplash.com/photo-1511578314322-379afb476865?w=600&q=80",
-    className: "bottom-[18%] left-[12%] h-24 w-36 sm:h-28 sm:w-44",
-    delay: "0.8s",
-    depth: 0.2,
-  },
-  {
-    src: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=600&q=80",
-    className: "bottom-[14%] right-[10%] h-28 w-40 sm:h-36 sm:w-52",
-    delay: "1.2s",
-    depth: 0.3,
-  },
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
+const services = [
+  { icon: Box, label: "Stands personalizados" },
+  { icon: Layers3, label: "Quiosques e tendas" },
+  { icon: CalendarCheck, label: "Aluguer e montagem" },
 ];
 
 export default function Hero() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [scrollY, setScrollY] = useState(0);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setReady(true);
-    const onScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const frame = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(frame);
   }, []);
 
-  function onMove(e: React.MouseEvent) {
-    const el = sectionRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setOffset({ x, y });
-  }
-
-  function onLeave() {
-    setOffset({ x: 0, y: 0 });
-  }
-
-  const parallaxBg = scrollY * 0.35;
-
   return (
-    <section
-      ref={sectionRef}
-      onMouseMove={onMove}
-      onMouseLeave={onLeave}
-      className="relative min-h-[92vh] overflow-hidden"
-    >
-      {/* Base gradient + animated mesh */}
+    <section className="relative isolate flex min-h-[90svh] flex-col justify-center overflow-hidden bg-[#fafbfe] px-5 py-24 text-zinc-950 transition-colors duration-500 dark:bg-[#080b12] dark:text-white sm:px-8 lg:px-12">
+      {/* Fundo subtil */}
       <div
-        className="absolute inset-0 bg-[#050a18]"
-        style={{ transform: `translateY(${parallaxBg * 0.3}px)` }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-950 via-[#0a1628] to-zinc-950" />
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(59,130,246,0.10),transparent_55%)] dark:bg-[radial-gradient(ellipse_at_50%_0%,rgba(59,130,246,0.16),transparent_55%)]" />
 
-      {/* Animated orbs */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div
-          className="absolute -left-32 top-1/4 h-[28rem] w-[28rem] rounded-full bg-brand-600/30 blur-[100px] transition-transform duration-700 ease-out"
-          style={{
-            transform: `translate(${offset.x * -40}px, ${offset.y * -30 + parallaxBg * 0.15}px)`,
-          }}
-        />
-        <div
-          className="absolute -right-24 top-1/3 h-[24rem] w-[24rem] rounded-full bg-cyan-500/20 blur-[90px] transition-transform duration-700 ease-out"
-          style={{
-            transform: `translate(${offset.x * 50}px, ${offset.y * 20 + parallaxBg * 0.1}px)`,
-          }}
-        />
-        <div
-          className="absolute bottom-0 left-1/2 h-[20rem] w-[40rem] -translate-x-1/2 rounded-full bg-brand-500/15 blur-[80px]"
-          style={{ transform: `translateX(-50%) translateY(${parallaxBg * 0.2}px)` }}
-        />
-        {/* Grid overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.12) 1px, transparent 1px)",
-            backgroundSize: "64px 64px",
-            transform: `translateY(${parallaxBg * 0.5}px)`,
-          }}
-        />
-        {/* Scan line shimmer */}
-        <div className="hero-shimmer absolute inset-0 opacity-30" />
+        <div className="absolute -right-40 top-24 h-96 w-96 rounded-full bg-blue-400/[0.08] blur-[100px] dark:bg-blue-500/[0.10]" />
+
+        <div className="absolute -left-40 bottom-0 h-80 w-80 rounded-full bg-brand-500/[0.08] blur-[100px]" />
+
+        <div className="absolute inset-0 opacity-[0.025] [background-image:linear-gradient(to_right,#64748b_1px,transparent_1px),linear-gradient(to_bottom,#64748b_1px,transparent_1px)] [background-size:64px_64px] dark:opacity-[0.045]" />
       </div>
 
-      {/* Floating photo cards with parallax */}
-      <div className="pointer-events-none absolute inset-0 hidden lg:block">
-        {FLOATING.map((item, i) => (
-          <div
-            key={i}
-            className={`absolute overflow-hidden rounded-2xl border border-white/15 shadow-2xl shadow-black/50 transition-transform duration-500 ease-out ${item.className} ${
-              ready ? "opacity-100" : "opacity-0"
+      <div className="mx-auto w-full max-w-7xl">
+        {/* Etiqueta superior */}
+        <div
+          className={`mb-8 flex justify-center transition-all duration-700 ${
+            ready ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+          }`}
+        >
+          <div className="inline-flex items-center gap-2.5 rounded-full border border-blue-200/80 bg-white/80 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.19em] text-blue-700 shadow-sm shadow-blue-950/[0.03] backdrop-blur-xl dark:border-blue-400/20 dark:bg-white/[0.04] dark:text-blue-300">
+            <Sparkles size={14} />
+            <span>Soluções para eventos</span>
+            <span className="h-1 w-1 rounded-full bg-blue-500" />
+            <span className="tracking-normal">360°</span>
+          </div>
+        </div>
+
+        {/* Título principal — Manrope */}
+        <div className="mx-auto max-w-5xl text-center">
+          <h1
+            className={`${manrope.className} text-balance text-[clamp(3rem,7vw,6.5rem)] font-semibold leading-[1.02] tracking-[-0.055em] transition-all duration-1000 ${
+              ready ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
             }`}
-            style={{
-              transform: `translate(${offset.x * item.depth * -80}px, ${
-                offset.y * item.depth * -60 + parallaxBg * item.depth
-              }px) rotate(${offset.x * item.depth * 6}deg)`,
-              transitionDelay: item.delay,
-              animation: ready ? `heroFloat ${6 + i}s ease-in-out infinite` : undefined,
-              animationDelay: item.delay,
-            }}
           >
-            <Image src={item.src} alt="" fill className="object-cover" sizes="200px" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-          </div>
-        ))}
-      </div>
+            Damos forma
+            <br />
+            às suas{" "}
+            <span className="relative inline-block">
+              <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400 bg-clip-text text-transparent dark:from-blue-400 dark:via-sky-400 dark:to-cyan-300">
+                ideias.
+              </span>
 
-      {/* Content */}
-      <div className="relative z-10 mx-auto flex min-h-[92vh] max-w-6xl flex-col items-center justify-center px-4 py-28 text-center sm:px-6">
-        <div
-          className={`transition-all duration-1000 ${
-            ready ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-          }`}
-        >
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-brand-200 backdrop-blur-xl">
-            <Sparkles size={14} className="text-brand-400" />
-            Venda · Aluguer · Produção
-          </div>
-        </div>
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 240 12"
+                className="absolute -bottom-2 left-0 h-2 w-full text-blue-500/50"
+                fill="none"
+              >
+                <path
+                  d="M3 8C65 2 165 2 237 7"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
+          </h1>
 
-        <h1
-          className={`max-w-4xl text-balance text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl transition-all duration-1000 delay-150 ${
-            ready ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-          }`}
-        >
-          Experiências de evento
-          <span className="relative mt-1 block bg-gradient-to-r from-brand-300 via-cyan-300 to-brand-400 bg-clip-text text-transparent">
-            que ficam na memória
-          </span>
-        </h1>
-
-        <p
-          className={`mt-6 max-w-2xl text-base leading-relaxed text-zinc-300 sm:text-lg transition-all duration-1000 delay-300 ${
-            ready ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-          }`}
-        >
-          Stands, quiosques e equipamentos premium. Do projecto à montagem —
-          escolha no catálogo, envie o pedido e a nossa equipa confirma tudo consigo.
-        </p>
-
-        <div
-          className={`mt-10 flex flex-wrap items-center justify-center gap-4 transition-all duration-1000 delay-500 ${
-            ready ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-          }`}
-        >
-          <Link
-            href="/catalogo"
-            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-white px-7 py-3.5 text-sm font-bold text-brand-900 shadow-xl shadow-white/10 transition hover:scale-[1.03] active:scale-[0.98]"
+          <p
+            className={`mx-auto mt-8 max-w-2xl text-pretty text-base leading-7 text-zinc-600 transition-all delay-150 duration-1000 dark:text-zinc-400 sm:text-lg sm:leading-8 ${
+              ready ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"
+            }`}
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-brand-100 to-white opacity-0 transition group-hover:opacity-100" />
-            <span className="relative">Explorar catálogo</span>
-            <ArrowRight size={18} className="relative transition group-hover:translate-x-0.5" />
-          </Link>
-          <Link
-            href="/#galeria"
-            className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-xl transition hover:scale-[1.03] hover:bg-white/10 active:scale-[0.98]"
-          >
-            <Play size={16} className="fill-current" />
-            Ver trabalhos
-          </Link>
-        </div>
+            Stands, quiosques, tendas e equipamentos para eventos.
+            Tratamos da produção, do aluguer e da montagem para que
+            se possa concentrar no que realmente importa.
+          </p>
 
-        {/* Stats strip */}
-        <div
-          className={`mt-16 grid w-full max-w-xl grid-cols-3 gap-4 transition-all duration-1000 delay-700 ${
-            ready ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-          }`}
-        >
-          {[
-            { n: "150+", l: "Eventos" },
-            { n: "40+", l: "Produtos" },
-            { n: "24h", l: "Resposta" },
-          ].map((s) => (
-            <div
-              key={s.l}
-              className="rounded-2xl border border-white/10 bg-white/5 px-3 py-4 backdrop-blur-md"
+          {/* Botões */}
+          <div
+            className={`mt-9 flex flex-col items-stretch justify-center gap-3 transition-all delay-300 duration-1000 sm:flex-row sm:items-center ${
+              ready ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"
+            }`}
+          >
+            <Link
+              href="/catalogo"
+              className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-full bg-blue-600 px-7 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-xl hover:shadow-blue-600/25 active:translate-y-0 dark:bg-blue-500 dark:hover:bg-blue-400"
             >
-              <div className="text-2xl font-bold tracking-tight text-white sm:text-3xl">{s.n}</div>
-              <div className="mt-0.5 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
-                {s.l}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+              Explorar catálogo
+              <ArrowRight
+                size={17}
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </Link>
 
-      {/* Bottom fade */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-zinc-50 to-transparent dark:from-zinc-950" />
+            <Link
+              href="/#contacto"
+              className="group inline-flex min-h-14 items-center justify-center gap-2.5 rounded-full border border-zinc-200 bg-white/70 px-7 text-sm font-semibold text-zinc-800 shadow-sm backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:bg-white dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-100 dark:hover:border-blue-400/40 dark:hover:bg-white/[0.08]"
+            >
+              <MessageCircle
+                size={17}
+                className="text-blue-600 dark:text-blue-400"
+              />
+              Pedir orçamento
+            </Link>
+          </div>
+        </div>
+
+        {/* Serviços */}
+        <div
+          className={`mx-auto mt-20 max-w-5xl transition-all delay-500 duration-1000 sm:mt-24 ${
+            ready ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          }`}
+        >
+          <div className="h-px bg-gradient-to-r from-transparent via-zinc-300 to-transparent dark:via-white/15" />
+
+          <div className="grid grid-cols-1 divide-y divide-zinc-200/80 dark:divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            {services.map(({ icon: Icon, label }, index) => (
+              <div
+                key={label}
+                className="group flex items-center justify-between gap-4 px-4 py-5 sm:justify-center sm:px-5 sm:py-7"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-blue-600 transition duration-300 group-hover:scale-105 group-hover:bg-blue-100 dark:border-blue-400/15 dark:bg-blue-400/[0.08] dark:text-blue-400 dark:group-hover:bg-blue-400/[0.15]">
+                    <Icon size={19} strokeWidth={1.7} />
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+                      {label}
+                    </p>
+                    <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-500">
+                      {index === 0
+                        ? "Feitos à sua medida"
+                        : index === 1
+                          ? "Flexibilidade para cada ocasião"
+                          : "Do início ao fim"}
+                    </p>
+                  </div>
+                </div>
+
+                <ArrowDownRight
+                  size={16}
+                  className="text-zinc-400 transition duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-blue-500 sm:hidden"
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="h-px bg-gradient-to-r from-transparent via-zinc-300 to-transparent dark:via-white/15" />
+        </div>
+
+        {/* Assinatura */}
+        <p
+          className={`mt-7 text-center text-[10px] font-medium uppercase tracking-[0.25em] text-zinc-400 transition-opacity delay-700 duration-1000 dark:text-zinc-600 ${
+            ready ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          Cada detalhe conta.
+        </p>
+      </div>
     </section>
   );
 }
