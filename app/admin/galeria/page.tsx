@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { Plus, Images } from "lucide-react";
 import GalleryActions from "./GalleryActions";
@@ -54,13 +53,12 @@ export default async function AdminGaleriaPage() {
                 key={p.id}
                 className="overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900"
               >
-                <div className="relative aspect-[16/10] bg-zinc-100 dark:bg-zinc-800">
-                  <Image
+                <div className="relative aspect-[16/10] overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
                     src={p.coverImage}
                     alt={p.title}
-                    fill
-                    className="object-cover"
-                    sizes="33vw"
+                    className="h-full w-full object-cover"
                   />
                   {!p.published && (
                     <span className="absolute left-2 top-2 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white">

@@ -63,7 +63,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           {/* Logo — troca light/dark */}
           <Link href="/" className="relative flex shrink-0 items-center">
             <Image
-              src="/logo-light.jpeg"
+              src="/logo-light.png"
               alt={SITE}
               width={120}
               height={40}
@@ -71,7 +71,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               priority
             />
             <Image
-              src="/logo-dark.jpeg"
+              src="/logo-dark.png"
               alt={SITE}
               width={120}
               height={40}

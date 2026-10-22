@@ -4,9 +4,26 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
+type RecentOrder = {
+  id: string;
+  code: string;
+  customerName: string;
+  status: string;
+  totalEstimated: number;
+  createdAt: Date;
+};
+
 export default async function AdminDashboard() {
-  const [total, pendentes, aprovados, rejeitados, recent, sumAgg] =
-    await Promise.all([
+  let total = 0;
+  let pendentes = 0;
+  let aprovados = 0;
+  let rejeitados = 0;
+  let recent: RecentOrder[] = [];
+  let totalEstimated = 0;
+  let dbError: string | null = null;
+
+  try {
+    const [t, p, a, r, rec, sumAgg] = await Promise.all([
       prisma.order.count(),
       prisma.order.count({ where: { status: "PENDENTE" } }),
       prisma.order.count({ where: { status: "APROVADO" } }),
@@ -14,10 +31,30 @@ export default async function AdminDashboard() {
       prisma.order.findMany({
         orderBy: { createdAt: "desc" },
         take: 8,
-        include: { items: true },
+        select: {
+          id: true,
+          code: true,
+          customerName: true,
+          status: true,
+          totalEstimated: true,
+          createdAt: true,
+        },
       }),
       prisma.order.aggregate({ _sum: { totalEstimated: true } }),
     ]);
+    total = t;
+    pendentes = p;
+    aprovados = a;
+    rejeitados = r;
+    recent = rec;
+    totalEstimated = sumAgg._sum.totalEstimated || 0;
+  } catch (e) {
+    console.error("[admin/dashboard] DB error:", e);
+    dbError =
+      e instanceof Error
+        ? e.message
+        : "Não foi possível ligar à base de dados.";
+  }
 
   const cards = [
     { label: "Total pedidos", value: total, color: "text-zinc-900 dark:text-white" },
@@ -29,6 +66,19 @@ export default async function AdminDashboard() {
   return (
     <div>
       <h1 className="mb-6 text-2xl font-bold">Dashboard</h1>
+
+      {dbError && (
+        <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200">
+          <p className="font-semibold">Base de dados inacessível</p>
+          <p className="mt-1 break-all opacity-90">{dbError}</p>
+          <p className="mt-2 text-xs opacity-75">
+            Verifica o DATABASE_URL no .env (projecto Neon activo,{" "}
+            <code>sslmode=require</code>, remove{" "}
+            <code>channel_binding</code> se falhar). Depois:{" "}
+            <code>npx prisma db push</code>
+          </p>
+        </div>
+      )}
 
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
@@ -45,7 +95,7 @@ export default async function AdminDashboard() {
       <div className="mb-8 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
         <p className="text-sm text-zinc-500">Valor estimado total das encomendas</p>
         <p className="mt-1 text-2xl font-bold text-brand-700 dark:text-brand-400">
-          {formatKz(sumAgg._sum.totalEstimated || 0)}
+          {formatKz(totalEstimated)}
         </p>
       </div>
 
@@ -81,7 +131,7 @@ export default async function AdminDashboard() {
                 recent.map((o) => (
                   <tr
                     key={o.id}
-                    className="border-b border-zinc-50 hover:bg-zinc-50 dark:border-zinc-800/50 dark:hover:bg-zinc-800/30"
+                    className="border-b border-zinc-50 dark:border-zinc-800/50"
                   >
                     <td className="px-5 py-3">
                       <Link
@@ -93,7 +143,7 @@ export default async function AdminDashboard() {
                     </td>
                     <td className="px-5 py-3">{o.customerName}</td>
                     <td className="px-5 py-3">
-                      <StatusBadge status={o.status} />
+                      {STATUS_LABELS[o.status] || o.status}
                     </td>
                     <td className="px-5 py-3">{formatKz(o.totalEstimated)}</td>
                     <td className="px-5 py-3 text-zinc-500">
@@ -107,26 +157,5 @@ export default async function AdminDashboard() {
         </div>
       </div>
     </div>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    PENDENTE: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
-    EM_ANALISE: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300",
-    AGUARDANDO_RESPOSTA:
-      "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300",
-    APROVADO: "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300",
-    REJEITADO: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300",
-    CONCLUIDO: "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300",
-  };
-  return (
-    <span
-      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-        colors[status] || colors.PENDENTE
-      }`}
-    >
-      {STATUS_LABELS[status] || status}
-    </span>
   );
 }

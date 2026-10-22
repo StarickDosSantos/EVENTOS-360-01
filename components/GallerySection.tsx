@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { X, ChevronLeft, ChevronRight, Images } from "lucide-react";
 import { cn } from "@/lib/utils";
+import SafeImage from "@/components/SafeImage";
 
 export type GalleryItem = {
   id: string;
@@ -43,7 +43,9 @@ export default function GallerySection({ projects }: { projects: GalleryItem[] }
     return (
       <section id="galeria" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Galeria de trabalhos</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Galeria de trabalhos
+          </h2>
           <p className="mt-3 text-zinc-600 dark:text-zinc-400">
             Em breve — projectos publicados pelo admin aparecerão aqui
           </p>
@@ -63,7 +65,9 @@ export default function GallerySection({ projects }: { projects: GalleryItem[] }
           <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
             Portfolio
           </p>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Galeria de trabalhos</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Galeria de trabalhos
+          </h2>
           <p className="mt-3 text-zinc-600 dark:text-zinc-400">
             Clique num projecto para ver detalhes e fotos em tamanho grande
           </p>
@@ -80,16 +84,19 @@ export default function GallerySection({ projects }: { projects: GalleryItem[] }
                 i === 0 && "sm:col-span-2 sm:row-span-1"
               )}
             >
-              <div className={cn("relative overflow-hidden", i === 0 ? "aspect-[16/9]" : "aspect-[4/3]")}>
-                <Image
+              <div
+                className={cn(
+                  "relative overflow-hidden bg-zinc-200 dark:bg-zinc-800",
+                  i === 0 ? "aspect-[16/9]" : "aspect-[4/3]"
+                )}
+              >
+                <SafeImage
                   src={p.coverImage}
                   alt={p.title}
-                  fill
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="transition-transform duration-700 ease-out group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-5">
+                <div className="absolute inset-x-0 bottom-0 p-5 text-left">
                   <span className="mb-2 inline-block rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur-md">
                     {p.category}
                   </span>
@@ -102,7 +109,8 @@ export default function GallerySection({ projects }: { projects: GalleryItem[] }
                     </p>
                   )}
                   <p className="mt-2 text-xs font-medium text-white/60">
-                    {p.images.length} foto{p.images.length !== 1 ? "s" : ""} · Ver projecto →
+                    {p.images.length} foto{p.images.length !== 1 ? "s" : ""} · Ver
+                    projecto →
                   </p>
                 </div>
               </div>
@@ -111,7 +119,6 @@ export default function GallerySection({ projects }: { projects: GalleryItem[] }
         </div>
       </section>
 
-      {/* Lightbox / Modal */}
       {active && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md"
@@ -123,15 +130,18 @@ export default function GallerySection({ projects }: { projects: GalleryItem[] }
             className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="flex items-start justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-6">
               <div>
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-brand-400">
                   {active.category}
                 </span>
-                <h3 className="text-xl font-bold text-white sm:text-2xl">{active.title}</h3>
+                <h3 className="text-xl font-bold text-white sm:text-2xl">
+                  {active.title}
+                </h3>
                 {active.description && (
-                  <p className="mt-1 max-w-2xl text-sm text-zinc-400">{active.description}</p>
+                  <p className="mt-1 max-w-2xl text-sm text-zinc-400">
+                    {active.description}
+                  </p>
                 )}
               </div>
               <button
@@ -144,18 +154,13 @@ export default function GallerySection({ projects }: { projects: GalleryItem[] }
               </button>
             </div>
 
-            {/* Main photo */}
-            <div className="relative flex min-h-0 flex-1 items-center justify-center bg-black">
-              <div className="relative aspect-[16/10] w-full max-h-[60vh]">
-                <Image
-                  src={active.images[photoIdx] || active.coverImage}
-                  alt={`${active.title} — foto ${photoIdx + 1}`}
-                  fill
-                  className="object-contain"
-                  sizes="90vw"
-                  priority
-                />
-              </div>
+            <div className="relative flex min-h-0 flex-1 items-center justify-center bg-black p-4">
+              <SafeImage
+                src={active.images[photoIdx] || active.coverImage}
+                alt={`${active.title} — foto ${photoIdx + 1}`}
+                fit="contain"
+                className="max-h-[60vh] w-auto"
+              />
               {active.images.length > 1 && (
                 <>
                   <button
@@ -178,7 +183,6 @@ export default function GallerySection({ projects }: { projects: GalleryItem[] }
               )}
             </div>
 
-            {/* Thumbnails */}
             {active.images.length > 1 && (
               <div className="flex gap-2 overflow-x-auto border-t border-white/10 px-4 py-3">
                 {active.images.map((src, i) => (
@@ -193,7 +197,7 @@ export default function GallerySection({ projects }: { projects: GalleryItem[] }
                         : "border-transparent opacity-50 hover:opacity-80"
                     )}
                   >
-                    <Image src={src} alt="" fill className="object-cover" sizes="80px" />
+                    <SafeImage src={src} alt="" />
                   </button>
                 ))}
               </div>
