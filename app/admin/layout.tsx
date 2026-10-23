@@ -2,7 +2,13 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
-import { LayoutDashboard, Package, ShoppingBag, Images } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingBag,
+  Images,
+  Settings,
+} from "lucide-react";
 import AdminSignOut from "./AdminSignOut";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -21,6 +27,7 @@ export default async function AdminLayout({
     { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingBag },
     { href: "/admin/produtos", label: "Produtos", icon: Package },
     { href: "/admin/galeria", label: "Galeria", icon: Images },
+    { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
   ];
 
   return (

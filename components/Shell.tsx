@@ -23,14 +23,22 @@ const NAV = [
   { href: "/#contacto", label: "Contacto", hash: true },
 ];
 
-const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP || "244900000000";
-const SITE = process.env.NEXT_PUBLIC_SITE_NAME || "EVENTOS 360";
+const FALLBACK_WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP || "244900000000";
+const FALLBACK_SITE = process.env.NEXT_PUBLIC_SITE_NAME || "EVENTOS 360";
+const FALLBACK_EMAIL =
+  process.env.NEXT_PUBLIC_CONTACT_EMAIL || "contacto@stands.ao";
+const FALLBACK_TAGLINE =
+  "Venda e aluguer de stands, quiosques e equipamentos para eventos. Produção, montagem e suporte completo.";
 
 export default function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [siteName, setSiteName] = useState(FALLBACK_SITE);
+  const [whatsapp, setWhatsapp] = useState(FALLBACK_WHATSAPP);
+  const [email, setEmail] = useState(FALLBACK_EMAIL);
+  const [tagline, setTagline] = useState(FALLBACK_TAGLINE);
   const items = useCartStore((s) => s.items);
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
   const isAdmin = session?.user?.role === "ADMIN";
@@ -45,6 +53,19 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    fetch("/api/configuracoes")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((s) => {
+        if (!s) return;
+        if (s.siteName) setSiteName(s.siteName);
+        if (s.whatsapp) setWhatsapp(s.whatsapp);
+        if (s.email) setEmail(s.email);
+        if (s.tagline) setTagline(s.tagline);
+      })
+      .catch(() => {});
+  }, []);
 
   if (isAdminRoute) {
     return <>{children}</>;
@@ -64,7 +85,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           <Link href="/" className="relative flex shrink-0 items-center">
             <Image
               src="/logo-light.png"
-              alt={SITE}
+              alt={siteName}
               width={120}
               height={40}
               className="h-8 w-auto object-contain dark:hidden sm:h-9"
@@ -72,7 +93,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             />
             <Image
               src="/logo-dark.png"
-              alt={SITE}
+              alt={siteName}
               width={120}
               height={40}
               className="hidden h-8 w-auto object-contain dark:block sm:h-9"
@@ -130,67 +151,45 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                   type="button"
                   onClick={() => signOut({ callbackUrl: "/" })}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/40 text-zinc-600 transition hover:bg-white/70 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
+                  title="Sair"
                 >
                   <LogOut size={15} />
                 </button>
               </div>
-            ) : (
-              <Link
-                href="/login"
-                className="hidden rounded-full border border-white/20 bg-white/40 px-3 py-2 text-xs font-semibold text-zinc-700 transition hover:bg-white/70 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 sm:inline-flex"
-              >
-                Entrar
-              </Link>
-            )}
+            ) : null}
+
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/40 md:hidden dark:border-white/10 dark:bg-white/5"
-              onClick={() => setOpen(!open)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/40 text-zinc-700 md:hidden dark:border-white/10 dark:bg-white/5 dark:text-zinc-200"
+              onClick={() => setOpen((v) => !v)}
               aria-label="Menu"
             >
-              {open ? <X size={17} /> : <Menu size={17} />}
+              {open ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
         </header>
       </div>
 
-      {/* Mobile dropdown */}
+      {/* Mobile menu */}
       {open && (
-        <div className="fixed inset-x-3 top-[4.25rem] z-40 mx-auto max-w-3xl animate-in fade-in slide-in-from-top-2 md:hidden">
-          <div className="glass-strong rounded-2xl p-3 shadow-2xl">
-            <nav className="flex flex-col gap-0.5">
+        <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden">
+          <div className="absolute inset-x-3 top-20 rounded-2xl border border-white/20 bg-white p-4 shadow-2xl dark:border-white/10 dark:bg-zinc-900">
+            <nav className="flex flex-col gap-1">
               {NAV.map((l) => (
                 <Link
                   key={l.href}
                   href={l.href}
-                  onClick={() => setOpen(false)}
-                  className="rounded-xl px-4 py-3 text-sm font-medium text-zinc-700 transition hover:bg-white/50 dark:text-zinc-200 dark:hover:bg-white/10"
+                  className="rounded-xl px-4 py-3 text-sm font-medium text-zinc-800 hover:bg-zinc-100 dark:text-zinc-100 dark:hover:bg-zinc-800"
                 >
                   {l.label}
                 </Link>
               ))}
-              <Link
-                href="/carrinho"
-                onClick={() => setOpen(false)}
-                className="rounded-xl px-4 py-3 text-sm font-medium text-zinc-700 transition hover:bg-white/50 dark:text-zinc-200"
-              >
-                Carrinho ({totalItems})
-              </Link>
-              {isAdmin ? (
+              {isAdmin && (
                 <Link
                   href="/admin"
-                  onClick={() => setOpen(false)}
-                  className="rounded-xl px-4 py-3 text-sm font-medium text-brand-600"
+                  className="rounded-xl px-4 py-3 text-sm font-semibold text-brand-600"
                 >
-                  Painel Admin
-                </Link>
-              ) : (
-                <Link
-                  href="/login"
-                  onClick={() => setOpen(false)}
-                  className="rounded-xl px-4 py-3 text-sm font-medium"
-                >
-                  Entrar
+                  Área admin
                 </Link>
               )}
             </nav>
@@ -198,50 +197,55 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      {/* Spacer for fixed nav */}
-      <div className="h-16 sm:h-[4.5rem]" />
+      <main className="flex-1 pt-20">{children}</main>
 
-      <main className="flex-1">{children}</main>
-
-      <footer className="relative mt-8 border-t border-white/10 bg-white/40 backdrop-blur-xl dark:bg-zinc-950/60">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 sm:px-6 lg:grid-cols-3">
+      <footer className="mt-auto border-t border-white/10 bg-white/60 backdrop-blur-xl dark:bg-zinc-950/80">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-3">
           <div>
-            <div className="mb-3">
+            <div className="mb-4">
               <Image
                 src="/logo-light.jpeg"
-                alt={SITE}
+                alt={siteName}
                 width={140}
                 height={48}
                 className="h-10 w-auto object-contain dark:hidden"
               />
               <Image
                 src="/logo-dark.jpeg"
-                alt={SITE}
+                alt={siteName}
                 width={140}
                 height={48}
                 className="hidden h-10 w-auto object-contain dark:block"
               />
             </div>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Venda e aluguer de stands, quiosques e equipamentos para eventos.
-              Produção, montagem e suporte completo.
+              {tagline}
             </p>
           </div>
           <div>
             <h4 className="mb-3 text-sm font-semibold">Navegação</h4>
             <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
               <li>
-                <Link href="/catalogo" className="transition hover:text-brand-600">
+                <Link
+                  href="/catalogo"
+                  className="transition hover:text-brand-600"
+                >
                   Catálogo
                 </Link>
               </li>
               <li>
-                <Link href="/#galeria" className="transition hover:text-brand-600">
+                <Link
+                  href="/#galeria"
+                  className="transition hover:text-brand-600"
+                >
                   Galeria
                 </Link>
               </li>
               <li>
-                <Link href="/#contacto" className="transition hover:text-brand-600">
+                <Link
+                  href="/#contacto"
+                  className="transition hover:text-brand-600"
+                >
                   Contacto
                 </Link>
               </li>
@@ -250,20 +254,21 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           <div>
             <h4 className="mb-3 text-sm font-semibold">Contacto</h4>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              WhatsApp: +{WHATSAPP}
+              WhatsApp: +{whatsapp}
               <br />
-              Email: {process.env.NEXT_PUBLIC_CONTACT_EMAIL || "contacto@stands.ao"}
+              Email: {email}
             </p>
           </div>
         </div>
         <div className="border-t border-white/10 py-4 text-center text-xs text-zinc-500">
-          © {new Date().getFullYear()} {SITE}. Todos os direitos reservados.
+          © {new Date().getFullYear()} {siteName}. Todos os direitos
+          reservados.
         </div>
       </footer>
 
       {/* Floating WhatsApp */}
       <a
-        href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
+        href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(
           "Olá! Gostaria de saber mais sobre stands e equipamentos."
         )}`}
         target="_blank"
