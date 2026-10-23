@@ -66,6 +66,14 @@ export async function DELETE(
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
   const { id } = await params;
-  await prisma.product.delete({ where: { id } });
-  return NextResponse.json({ ok: true });
+  try {
+    await prisma.product.delete({ where: { id } });
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[produtos DELETE]", err);
+    return NextResponse.json(
+      { error: "Não foi possível eliminar o produto" },
+      { status: 400 }
+    );
+  }
 }

@@ -1,5 +1,32 @@
 import { PrismaClient, ProductCategory, ProductModality, PriceUnit, ProductStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { readFileSync } from "fs";
+import { resolve } from "path";
+
+/** Carrega .env (tsx não carrega sozinho, ao contrário do Next.js) */
+function loadEnv() {
+  try {
+    const raw = readFileSync(resolve(process.cwd(), ".env"), "utf8");
+    for (const line of raw.split("\n")) {
+      const t = line.trim();
+      if (!t || t.startsWith("#")) continue;
+      const i = t.indexOf("=");
+      if (i < 0) continue;
+      const key = t.slice(0, i).trim();
+      let val = t.slice(i + 1).trim();
+      if (
+        (val.startsWith('"') && val.endsWith('"')) ||
+        (val.startsWith("'") && val.endsWith("'"))
+      ) {
+        val = val.slice(1, -1);
+      }
+      if (!process.env[key]) process.env[key] = val;
+    }
+  } catch {
+    /* ignore */
+  }
+}
+loadEnv();
 
 const prisma = new PrismaClient();
 
@@ -177,13 +204,18 @@ const products = [
 async function main() {
   console.log("Seeding...");
 
-  const email = process.env.ADMIN_EMAIL || "admin@eventos360.ao";
+  const email = (process.env.ADMIN_EMAIL || "admin@eventos360.ao").trim().toLowerCase();
   const password = process.env.ADMIN_PASSWORD || "admin123";
   const hash = await bcrypt.hash(password, 10);
 
+  // User.passwordHash → coluna "password" | User.name → coluna "nome" (schema @map)
   await prisma.user.upsert({
     where: { email },
-    update: {},
+    update: {
+      passwordHash: hash,
+      role: "ADMIN",
+      name: "Administrador",
+    },
     create: {
       email,
       name: "Administrador",
@@ -191,7 +223,7 @@ async function main() {
       role: "ADMIN",
     },
   });
-  console.log(`Admin: ${email} / ${password}`);
+  console.log(`Admin pronto: ${email} / ${password}`);
 
   for (const p of products) {
     await prisma.product.upsert({

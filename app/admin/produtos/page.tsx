@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Plus } from "lucide-react";
 import ProductToggle from "./ProductToggle";
+import ProductActions from "./ProductActions";
 
 export const dynamic = "force-dynamic";
 
@@ -79,12 +80,7 @@ export default async function AdminProdutosPage() {
                     <ProductToggle id={p.id} status={p.status} />
                   </td>
                   <td className="px-4 py-3">
-                    <Link
-                      href={`/admin/produtos/${p.id}`}
-                      className="text-xs font-semibold text-brand-600 hover:underline"
-                    >
-                      Editar
-                    </Link>
+                    <ProductActions id={p.id} name={p.name} />
                   </td>
                 </tr>
               ))}

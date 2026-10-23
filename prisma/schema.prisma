@@ -50,12 +50,20 @@ enum OrderType {
   PRODUCAO
 }
 
+enum Role {
+  ADMIN
+  CLIENTE
+}
+
+/// Alinhado com a BD real (colunas nome / password)
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
-  name         String?
-  passwordHash String
-  role         String   @default("ADMIN")
+  name         String?  @default("Administrador") @map("nome")
+  passwordHash String   @map("password")
+  role         Role     @default(ADMIN)
+  telefone     String?
+  avatar       String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -134,4 +142,18 @@ model GalleryProject {
   eventDate   DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+/// Configurações do site (singleton — id fixo "default")
+model SiteSettings {
+  id        String   @id @default("default")
+  siteName  String   @default("EVENTOS 360")
+  tagline   String   @default("Venda e aluguer de stands, quiosques e equipamentos para eventos. Produção, montagem e suporte completo.")
+  whatsapp  String   @default("244900000000")
+  email     String   @default("contacto@stands.ao")
+  phone     String?
+  address   String?
+  instagram String?
+  facebook  String?
+  updatedAt DateTime @updatedAt
 }

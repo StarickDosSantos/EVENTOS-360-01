@@ -204,14 +204,14 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           <div>
             <div className="mb-4">
               <Image
-                src="/logo-light.jpeg"
+                src="/logo-light.png"
                 alt={siteName}
                 width={140}
                 height={48}
                 className="h-10 w-auto object-contain dark:hidden"
               />
               <Image
-                src="/logo-dark.jpeg"
+                src="/logo-dark.png"
                 alt={siteName}
                 width={140}
                 height={48}

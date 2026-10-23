@@ -13,27 +13,51 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        });
-        if (!user) return null;
-        const valid = await bcrypt.compare(
-          credentials.password,
-          user.passwordHash
-        );
-        if (!valid) return null;
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        };
+
+        const email = credentials.email.trim().toLowerCase();
+
+        try {
+          // User.name → coluna "nome" | User.passwordHash → coluna "password"
+          const user = await prisma.user.findUnique({
+            where: { email },
+          });
+
+          if (!user?.passwordHash) {
+            console.error("[auth] user not found:", email);
+            return null;
+          }
+
+          const valid = await bcrypt.compare(
+            credentials.password,
+            user.passwordHash
+          );
+          if (!valid) {
+            console.error("[auth] invalid password for:", email);
+            return null;
+          }
+
+          if (user.role !== "ADMIN") {
+            console.error("[auth] not admin:", email, user.role);
+            return null;
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name || "Administrador",
+            role: "ADMIN",
+          };
+        } catch (e) {
+          console.error("[auth] authorize error:", e);
+          return null;
+        }
       },
     }),
   ],
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   pages: {
     signIn: "/login",
+    error: "/login",
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -52,4 +76,19 @@ export const authOptions: NextAuthOptions = {
     },
   },
   secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
+  debug: process.env.NODE_ENV === "development",
+  cookies: {
+    sessionToken: {
+      name:
+        process.env.NODE_ENV === "production"
+          ? "__Secure-next-auth.session-token"
+          : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
 };
